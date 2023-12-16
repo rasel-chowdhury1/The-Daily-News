@@ -6,26 +6,51 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {
   createBrowserRouter,
+  Navigate,
   RouterProvider,
 } from "react-router-dom";
 import Main from './components/Layout/Main.jsx';
-import Home from './components/Home/Home.jsx';
 import Category from './components/Category/Category.jsx';
 import NewsLayout from './components/Layout/NewsLayout.jsx';
 import News from './components/News/News.jsx';
+import AuthProvider from './components/providers/AuthProvider.jsx';
+import LoginLayout from './components/Layout/LoginLayout/LoginLayout.jsx';
+import Login from './components/Login/Login.jsx';
+import Register from './components/Register/Register.jsx';
+import PrivateRoute from './components/Routes/PrivateRoute.jsx';
+import TermsCondition from './components/TermsCondition/TermsCondition.jsx';
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Main></Main>,
+    path: '/',
+    element: <LoginLayout></LoginLayout>,
     children: [
       {
         path: '/',
-        element: <Home></Home>
+        element: <Navigate to="/category/0"></Navigate>
       },
       {
-        path: '/category/:category_id',
-        element: <Category></Category>
+        path: 'login',
+        element: <Login></Login>
+      },
+      {
+        path: 'register',
+        element: <Register></Register>
+      },
+      {
+        path: 'termsCondition',
+        element: <TermsCondition></TermsCondition>
+      }
+    ]
+  },
+  {
+    path: "category",
+    element: <Main></Main>,
+    children: [
+      {
+        path: ':category_id',
+        element: <Category></Category>,
+        loader: ({params}) => fetch(`http://localhost:3000/category/${params.category_id}`)
       }
     ]
   },
@@ -36,7 +61,8 @@ const router = createBrowserRouter([
     children:[
       {
         path: ':news_id',
-        element: <News></News>
+        element: <PrivateRoute><News></News></PrivateRoute>,
+        loader: ({params}) => fetch(`http://localhost:3000/news/${params.news_id}`)
       }
     ]
   }
@@ -44,6 +70,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router}></RouterProvider>
+    <AuthProvider>
+       <RouterProvider router={router}></RouterProvider>
+    </AuthProvider>
   </React.StrictMode>,
 )
